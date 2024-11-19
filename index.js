@@ -113,6 +113,8 @@ app.post("/upload", async (req, res) => {
         }
     }
 
+    console.log(info("Received animation upload request..."));
+
     const body = req.body;
     if(body == undefined || !Buffer.isBuffer(body)) {
         res.status(400)
@@ -146,6 +148,8 @@ app.post("/upload", async (req, res) => {
 
     uploadParameters.title = name;
 
+    console.log(info(`Uploading animation ${name}...`));
+
     const uploadURL = endpoints.uploadAnimation(uploadParameters.title, uploadParameters.description, uploadParameters.groupId);
     const animationData = body.subarray(byteOffset, body.length);
 
@@ -169,12 +173,17 @@ app.post("/upload", async (req, res) => {
     }
 
     const id = await uploadRequest.text();
+
+    console.log(info(`Successfully uploaded ${name} @ https://create.roblox.com/store/asset/${id} !`));
+
     res.status(200)
         .send(id);
 });
 
 app.post("/verify", async (req, res) => {
     isVerified = false;
+
+    console.log(info("Received verification request..."));
 
     const body = req.body;
     if(body.length == 0) {
@@ -221,6 +230,8 @@ app.post("/verify", async (req, res) => {
         console.log(error("E6: Client UserId does not match authenticated account!\nServer Response: 401"));
         return;
     }
+
+    console.log(info(`Successfully verified user: ${verificationData.name} (${verificationData.displayName} - ${verificationData.id})!`));
 
     isVerified = true;
     res.status(200)
