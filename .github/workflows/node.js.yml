@@ -41,7 +41,8 @@ jobs:
       - name: Upload to Releases
         uses: softprops/action-gh-release@v2.1.0
         with:
-          files: |
+         draft: true
+         files: |
             ./windows.zip
             ./mac.zip
         
