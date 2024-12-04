@@ -1,3 +1,5 @@
+// /compress endpoint is used for compressing chunk data in the ROBLOX binary format; there is no native LUA package for LZ4 compression, so we use an endpoint instead
+
 const lz4 = require("lz4");
 const { warning, info, error } = require("../utils");
 
@@ -27,7 +29,7 @@ function compress(req, res) {
         .send(lz4Output);
 };
 
-exports.handler = (req, res) => compress(req, res);
+exports.handler = compress;
 
 exports.info = {
     endpoints: ["/compress"],

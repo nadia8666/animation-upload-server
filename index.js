@@ -1,10 +1,12 @@
 const express = require("express");
 const fs = require("node:fs");
-const { info } = require("./utils");
+const http = require("http");
+const { info, warning } = require("./utils");
 const { join: joinPath } = require("node:path");
 const { raw, text } = require("body-parser");
 
 const app = express();
+const httpServer = http.createServer(app);
 const port = 25037;
 
 const endpointPath = joinPath(__dirname, "endpoints");
@@ -19,7 +21,10 @@ const endpointModules = [];
 const arguments = {
     "csrf": null,
     "verified": false,
-    "token": null
+    "token": null,
+    "userId": null,
+    "sessionToken": null,
+    "timeoutId": null,
 };
 
 const files = fs.readdirSync(endpointPath);
@@ -56,6 +61,17 @@ endpointModules.forEach((endpointModule) => {
     })
 })
 
-app.listen(port, () => {
-    console.log(info("Listening on port %s"), port);
-});
+function listenToPort(port) {
+    const listener = httpServer
+        .listen(port, () => {
+            console.log(info("Listening on port %s"), listener.address().port);
+        })
+        .on("error", (err) => {
+            if(err.code === "EADDRINUSE") {
+                console.log(warning("Port %s is unavailable, defaulting to unused port"), port);
+                httpServer.listen();
+            }
+        });
+};
+
+listenToPort(port);

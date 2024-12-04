@@ -1,7 +1,10 @@
 const chalk = require("chalk");
 const readline = require("readline/promises");
+const { randomBytes, createHash } = require("node:crypto");
 const { stdin: input, stdout: output } = require("node:process");
 const { findPassword } = require("keytar");
+
+const hashSalt = randomBytes(8);
 
 const token_warning = "_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_";
 
@@ -44,6 +47,56 @@ async function getCookie(forceAsk) {
     });
 };
 
+function generateSessionToken(userId) {
+    const timeGeneration = Date.now();
+    timeGeneration.valueOf();
+
+    userId = String(userId);
+    let bufferSize = userId.length + 14
+    let content = Buffer.alloc(bufferSize);
+    content.write(userId);
+    hashSalt.copy(content, bufferSize - 12);
+    content.writeUIntLE(timeGeneration.valueOf(), bufferSize - 8, 6);
+
+    return createHash("md5").update(content).digest("hex");
+}
+
+function secureCompare(str1, str2) {
+    if(typeof str1 != "string" || typeof str2 != "string") return false;
+
+    if (str1.length !== str2.length) {
+      return false;
+    }
+  
+    let result = 0;
+    for (let i = 0; i < str1.length; i++) {
+      result |= str1.charCodeAt(i) ^ str2.charCodeAt(i);
+    }
+  
+    return result === 0;
+}
+
+function isRequestCSRFVerified(req, args) {
+    return secureCompare(req.get("bau-x-csrf-token"), args.sessionToken);
+}
+
+function closeSession(args) {
+    if(args.verified) console.log(info("Closed Session"));
+    if(args.timeoutId) {
+        clearTimeout(args.timeoutId);
+    }
+
+    args.verified = false;
+    args.csrf = null;
+    args.sessionToken = null;
+    args.token = null;
+    args.userId = null;
+    args.timeoutId = null;
+}
+
+exports.closeSession = closeSession;
+exports.isRequestCSRFVerified = isRequestCSRFVerified;
+exports.generateSessionToken = generateSessionToken;
 exports.getCookie = getCookie;
 
 exports.endpoints = endpoints;

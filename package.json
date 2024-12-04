@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node node_modules/pkg/lib-es5/bin.js -c ./package.json -t node18-win-x64,node18-macos-x64 -C Brotli -o dist/server index.js --options no-warnings"
+    "build": "node node_modules/pkg/lib-es5/bin.js -c package.json -t node18-win-x64,node18-macos-x64 -C Brotli -o dist/server index.js --options no-warnings"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@napi-rs/clipboard": "^1.1.2",
     "body-parser": "^1.20.3",
     "chalk": "^4.1.2",
     "express": "^4.21.1",

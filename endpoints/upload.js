@@ -1,4 +1,4 @@
-const { warning, info, error, endpoints } = require("../utils");
+const { warning, info, error, endpoints, isRequestCSRFVerified } = require("../utils");
 
 async function upload(req, res, args) {
     const isVerified = args.verified;
@@ -9,6 +9,13 @@ async function upload(req, res, args) {
         res.status(401)
             .send("Not verified");
         console.log(error("E8: Attempted to upload while unverified!\nServer Response: 401"));
+        return;
+    }
+
+    if(!isRequestCSRFVerified(req, args)) {
+        res.status(401)
+            .send("Unable to verify CSRF token");
+        console.log(error("E12: BAU-CSRF Token is invalid!\nServer Response: 401"));
         return;
     }
 
@@ -98,7 +105,7 @@ async function upload(req, res, args) {
         .send(id);
 }
 
-exports.handler = (req, res, args) => upload(req, res, args);
+exports.handler = upload;
 
 exports.info = {
     endpoints: ["/upload"],

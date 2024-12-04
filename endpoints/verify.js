@@ -1,7 +1,7 @@
-const { warning, info, error, getCookie, endpoints } = require("../utils");
+const { warning, info, error, getCookie, endpoints, generateSessionToken, closeSession } = require("../utils");
 
 async function verify(req, res, args) {
-    args.verified = false;
+    closeSession(args);
 
     console.log(info("Received verification request..."));
 
@@ -58,12 +58,20 @@ async function verify(req, res, args) {
 
     console.log(info(`Successfully verified user: ${verificationData.name} (${verificationData.displayName} - ${verificationData.id})`));
 
+    const newSessionToken = generateSessionToken(clientUserId);
+
+    args.sessionToken = newSessionToken;
+    args.userId = clientUserId;
     args.verified = true;
+
+    args.timeoutId = setTimeout(closeSession, 60000, args);
+
+    res.set("bau-x-csrf-token", newSessionToken);
     res.status(200)
         .send("Verified!");
 }
 
-exports.handler = (req, res, args) => verify(req, res, args);
+exports.handler = verify;
 
 exports.info = {
     endpoints: ["/verify"],
