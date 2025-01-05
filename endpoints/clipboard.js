@@ -1,9 +1,7 @@
 // /clipboard endpoint is used for retrieving clipboard data for uploading blender animations
 
-const { Clipboard } = require("@napi-rs/clipboard");
+const { clipboard } = require("electron");
 const { warning, info, error, isRequestCSRFVerified } = require("../utils");
-
-const clipboard = new Clipboard();
 
 function getClipboard(req, res, args) {
     if(!args.verified) {
@@ -20,7 +18,7 @@ function getClipboard(req, res, args) {
         return;
     }
 
-    const clipboardContent = clipboard.getText();
+    const clipboardContent = clipboard.readText();
     if(Buffer.from(clipboardContent, "base64").toString("base64") !== clipboardContent) {
         res.status(500)
             .send("Clipboard does not contain pure base64; data will not be returned");
@@ -29,7 +27,7 @@ function getClipboard(req, res, args) {
     }
 
     res.status(200)
-        .send(clipboard.getText());
+        .send(clipboardContent);
 }
 
 exports.handler = getClipboard;

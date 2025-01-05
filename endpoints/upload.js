@@ -1,4 +1,10 @@
-const { warning, info, error, endpoints, isRequestCSRFVerified } = require("../utils");
+const { warning, info, error, endpoints, isRequestCSRFVerified, getSetting } = require("../utils");
+const { existsSync: pathExists } = require("node:fs");
+const { writeFile } = require("node:fs/promises");
+const { join: joinPath } = require("node:path");
+
+const BinaryHeader = Buffer.from([0x3c, 0x72, 0x6f, 0x62, 0x6c, 0x6f, 0x78, 0x21, 0x89, 0xff, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00]);
+const BinaryEnd = Buffer.from([0x45, 0x4e, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3c, 0x2f, 0x72, 0x6f, 0x62, 0x6c, 0x6f, 0x78, 0x3e]);
 
 async function upload(req, res, args) {
     const isVerified = args.verified;
@@ -40,6 +46,11 @@ async function upload(req, res, args) {
 
     console.log(info("Received animation upload request..."));
 
+    const shouldSaveLocally = getSetting("saveLocally");
+    const pathToSave = getSetting("localFilesLocation");
+
+    let canSaveLocally = shouldSaveLocally == true && pathExists(pathToSave);
+
     const body = req.body;
     if(body == undefined || !Buffer.isBuffer(body)) {
         res.status(400)
@@ -55,54 +66,90 @@ async function upload(req, res, args) {
     }
 
     let byteOffset = 0;
-    let isGroupUpload = body.readUintLE(byteOffset, 1);
+
+    let numOfAnimations = body.readUintLE(byteOffset, 1);
     byteOffset++;
 
-    if(isGroupUpload >= 1) {
-        let groupId = body.readBigUint64LE(byteOffset);
-        byteOffset += 8;
+    const uploadedAnimations = [];
 
-        uploadParameters.groupId = groupId;
+    for(var x = 0; x < numOfAnimations; x++) {
+        const i = x;
+        let isGroupUpload = body.readUintLE(byteOffset, 1);
+        byteOffset++;
+
+        if(isGroupUpload == 1) {
+            let groupId = body.readBigUint64LE(byteOffset);
+            byteOffset += 8;
+
+            uploadParameters.groupId = groupId;
+        }
+
+        let nameLength = body.readUintLE(byteOffset, 1);
+        byteOffset++;
+
+        const name = body.toString("utf8", byteOffset, byteOffset + nameLength);
+        byteOffset += nameLength;
+
+        uploadParameters.title = name;
+
+        let animationDataLength = body.readUint32LE(byteOffset);
+        byteOffset += 4;
+
+        console.log(info(`Uploading animation #${i + 1}: ${name}`));
+
+        const uploadURL = endpoints.uploadAnimation(uploadParameters.title, uploadParameters.description, uploadParameters.groupId);
+        const animationData = body.subarray(byteOffset, byteOffset + animationDataLength);
+
+        byteOffset += animationDataLength;
+
+        if(!animationData.subarray(0, 16).equals(BinaryHeader)) {
+            // res.status(400)
+            //     .send("Binary data malformed");
+            console.log(warn("E14: Animation Data does not contain the proper file header!"));
+            continue;
+        }
+
+        if(!animationData.subarray(animationData.length - 25).equals(BinaryEnd)) {
+            // res.status(400)
+            //     .send("Binary data malformed");
+            console.log(warn("E15: Animation Data does not contain the proper file ending!"));
+            continue;
+        }
+
+        const uploadRequest = await fetch(uploadURL, {
+            method: "POST",
+            headers: {
+                cookie: `.ROBLOSECURITY=${RBX_Cookie}`,
+                "User-Agent": "RobloxStudio/WinInet",
+                "Content-Type": "application/octet-stream",
+                "X-CSRF-Token": csrfToken
+            },
+            body: animationData
+        });
+
+        if(uploadRequest.status !== 200) {
+            let serverError = await uploadRequest.text();
+            // res.status(500)
+            //     .send(`RAPI ERROR: ${serverError}`);
+            console.log(warn(`RAPI ERROR: ${serverError}`));
+            continue;
+        }
+
+        const id = await uploadRequest.text();
+
+        console.log(info(`Successfully uploaded ${name} @ https://create.roblox.com/store/asset/${id} !`));
+
+        if(canSaveLocally) {
+            let savePath = joinPath(pathToSave, `${name}_${id}.rbxm`);
+
+            writeFile(savePath, animationData);
+        }
+
+        uploadedAnimations[i] = {name: name, id: id};
     }
 
-    let nameLength = body.readUintLE(byteOffset, 1);
-    byteOffset++;
-
-    let name = body.toString("utf8", byteOffset, byteOffset + nameLength);
-    byteOffset += nameLength;
-
-    uploadParameters.title = name;
-
-    console.log(info(`Uploading animation ${name}...`));
-
-    const uploadURL = endpoints.uploadAnimation(uploadParameters.title, uploadParameters.description, uploadParameters.groupId);
-    const animationData = body.subarray(byteOffset, body.length);
-
-    const uploadRequest = await fetch(uploadURL, {
-        method: "POST",
-        headers: {
-            cookie: `.ROBLOSECURITY=${RBX_Cookie}`,
-            "User-Agent": "RobloxStudio/WinInet",
-            "Content-Type": "application/octet-stream",
-            "X-CSRF-Token": csrfToken
-        },
-        body: animationData
-    });
-
-    if(uploadRequest.status !== 200) {
-        let serverError = await uploadRequest.text();
-        res.status(500)
-            .send(`RAPI ERROR: ${serverError}`);
-        console.log(error(`RAPI ERROR: ${serverError}\nServer Response: 500`));
-        return;
-    }
-
-    const id = await uploadRequest.text();
-
-    console.log(info(`Successfully uploaded ${name} @ https://create.roblox.com/store/asset/${id} !`));
-
-    res.status(200)
-        .send(id);
+        res.status(200)
+            .json(uploadedAnimations);
 }
 
 exports.handler = upload;

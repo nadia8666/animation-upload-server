@@ -1,6 +1,10 @@
 const { warning, info, error, getCookie, endpoints, generateSessionToken, closeSession } = require("../utils");
 
 async function verify(req, res, args) {
+    if(args.verified) {
+        console.log(warning("Verification request received despite ongoing session\nSession will be closed, but behavior may change"));
+    }
+
     closeSession(args);
 
     console.log(info("Received verification request..."));

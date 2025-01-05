@@ -6,11 +6,19 @@ const { findPassword } = require("keytar");
 
 const hashSalt = randomBytes(8);
 
+const appSettings = {
+    saveLocally: false,
+    runAtStartup: true,
+    localFilesLocation: ""
+}
+
 const token_warning = "_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_";
 
 const input_output = readline.createInterface({ input, output });
 
 const endpoints = {
+    "getAllGroups": (userId) => `https://groups.roblox.com/v1/users/${userId}/groups/roles`,
+    "getGroupPermissions": (groupId, roleId) => `https://groups.roblox.com/v1/groups/${groupId}/roles/${roleId}/permissions`,
     "authentication": "https://users.roblox.com/v1/users/authenticated",
     "logout": "https://auth.roblox.com/v2/logout",
     "uploadAnimation": (title, description, groupId) => "https://www.roblox.com/ide/publish/uploadnewanimation?assetTypeName=Animation" +
@@ -94,10 +102,31 @@ function closeSession(args) {
     args.timeoutId = null;
 }
 
+function getSetting(setting) {
+    return appSettings[setting];
+}
+
+function setSetting(setting, value) {
+    appSettings[setting] = value;
+}
+
+function toggleSetting(setting) {
+    appSettings[setting] = !appSettings[setting];
+}
+
+function getSettings() {
+    return Object.freeze({ ...appSettings });
+}
+
 exports.closeSession = closeSession;
 exports.isRequestCSRFVerified = isRequestCSRFVerified;
 exports.generateSessionToken = generateSessionToken;
 exports.getCookie = getCookie;
+
+exports.getSetting = getSetting;
+exports.setSetting = setSetting;
+exports.toggleSetting = toggleSetting;
+exports.getSettings = getSettings;
 
 exports.endpoints = endpoints;
 
