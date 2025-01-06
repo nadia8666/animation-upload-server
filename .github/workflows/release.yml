@@ -4,7 +4,10 @@
 name: Build CI
 
 on:
- workflow_dispatch:
+ push:
+    tags:
+      - "v*.*.*"
+
 
 jobs:
   build_on_windows:
@@ -27,7 +30,7 @@ jobs:
   releases:
     needs: [build_on_windows]
     runs-on: ubuntu-latest
-
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download Artifacts
         uses: actions/download-artifact@v4.1.8
@@ -40,7 +43,6 @@ jobs:
 
       - name: Upload to Releases
         uses: softprops/action-gh-release@v2.1.0
-        if: startsWith(github.ref, 'refs/tags/')
         with:
          token: ${{ secrets.RELEASE_TOKEN_TEST }}
          files: |
