@@ -10,7 +10,9 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        setupExe: "Setup.exe",
+      },
     },
     {
       name: '@electron-forge/maker-zip',
