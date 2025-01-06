@@ -6,6 +6,8 @@ const { info, warning, getSetting, setSetting, toggleSetting, getSettings } = re
 const { join: joinPath, resolve: resolvePath } = require("node:path");
 const { raw, text } = require("body-parser");
 
+if(require("electron-squirrel-startup")) return;
+
 const expressApp = express();
 const httpServer = http.createServer(expressApp);
 const defaultPort = 25037;

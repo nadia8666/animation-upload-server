@@ -17,15 +17,7 @@ module.exports = {
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
-    },
-    {
-      name: '@electron-forge/maker-deb',
-      config: {},
-    },
-    {
-      name: '@electron-forge/maker-rpm',
-      config: {},
-    },
+    }
   ],
   plugins: [
     {
@@ -44,4 +36,17 @@ module.exports = {
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
     }),
   ],
+
+  publishers: [
+    {
+      name: "@electron-forge/publisher-github",
+      config: {
+        repository: {
+          owner: "iiPotatoFlamesii",
+          name: "animation-upload-server"
+        },
+        generateReleaseNotes: true
+      }
+    }
+  ]
 };
