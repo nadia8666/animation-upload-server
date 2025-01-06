@@ -41,6 +41,7 @@ jobs:
       - name: Upload to Releases
         uses: softprops/action-gh-release@v2.1.0
         with:
+         token: ${{ secrets.RELEASE_TOKEN_TEST }}
          files: |
             ./windows_installer.zip
             ./windows_portable.zip
