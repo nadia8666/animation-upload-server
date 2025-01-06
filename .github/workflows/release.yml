@@ -1,31 +1,31 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Node.js CI
+name: Build CI
 
 on:
  workflow_dispatch:
 
 jobs:
-  build:
+  build_on_windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18.20.5'
+        node-version: '22.10.0'
         cache: 'npm'
     - run: npm ci
-    - run: npm run build --if-present
-#    - run: npm test
+    - run: npm run make
     - name: Upload Binaries
       uses: actions/upload-artifact@v4.4.3
       with:
-        name: Binaries
-        path: dist/
+        name: Win_Output
+        path: out
+   
   releases:
-    needs: [build]
+    needs: [build_on_windows]
     runs-on: ubuntu-latest
 
     steps:
@@ -35,14 +35,13 @@ jobs:
           path: ./artifacts
       - name: Zip Binaries
         run: |
-          zip -jr windows.zip ./artifacts/Binaries/server-win.exe
-          zip -jr mac.zip ./artifacts/Binaries/server-macos
+          zip -jr windows_installer.zip ./artifacts/Win_Output/make/squirrel.windows/x64
+          zip -jr windows_portable.zip ./artifacts/Win_Output/animation-upload-server-win32-x64
 
       - name: Upload to Releases
         uses: softprops/action-gh-release@v2.1.0
         with:
-         draft: true
          files: |
-            ./windows.zip
-            ./mac.zip
+            ./windows_installer.zip
+            ./windows_portable.zip
         
