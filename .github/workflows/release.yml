@@ -26,7 +26,8 @@ jobs:
     - name: Zip Binaries
       run: |
         mkdir windows_build
-        (cd out/make/squirrel.windows/x64 && zip -r - .) > windows_build/windows_installer.zip
+        mkdir windows_build/windows_installer
+        cp -r out/make/squirrel.windows/x64/* windows_build/windows_installer
         cp -r out/make/zip/win32/x64/*.zip windows_build/windows_portable.zip
     - name: Upload Binaries
       uses: actions/upload-artifact@v4.4.3
@@ -44,6 +45,10 @@ jobs:
         uses: actions/download-artifact@v4.1.8
         with:
           path: ./artifacts
+      - name: Zip Win_Installer
+        run: |
+          cd ./artifacts/windows
+          zip -jr windows_installer.zip windows_installer/*
       - name: Upload to Releases
         uses: softprops/action-gh-release@v2.1.0
         with:
