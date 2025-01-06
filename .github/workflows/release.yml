@@ -23,5 +23,5 @@ jobs:
       run: npm ci
     - name: Build & Publish
       env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TEST_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN_TEST }}
       run: npm run publish
