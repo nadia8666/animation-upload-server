@@ -4,7 +4,6 @@ const { warning, info, error, generateSessionToken, isRequestCSRFVerified, close
 
 async function handshake(req, res, args) {
     const body = req.body;
-    const csrfToken = req.get("bau-x-csrf-token");
 
     if(!args.verified) {
         res.status(401)

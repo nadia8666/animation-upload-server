@@ -14,6 +14,7 @@ const defaultPort = 25037;
 
 const electronUserDataPath = electronApp.getPath("userData");
 const settingsPath = joinPath(electronUserDataPath, "settings.json");
+const platform = process.platform;
 
 const endpointPath = joinPath(__dirname, "endpoints");
 
@@ -34,6 +35,20 @@ const sessionData = {
 };
 
 const files = fs.readdirSync(endpointPath);
+
+if(platform === "darwin") {
+    let path = joinPath(electronApp.getPath("documents"), "Roblox");
+    
+    if(!fs.existsSync(path)) throw new Error("Failed to find platform DARWIN path. Please report on GitHub.");
+
+    setSetting("pluginData", path);
+} else {
+    let path = resolvePath(process.env.LOCALAPPDATA, "Roblox");
+
+    if(!fs.existsSync(path)) throw new Error("Failed to find platform WIN32 path. Please report on GitHub.");
+
+    setSetting("pluginData", path);
+}
 
 files.forEach((fileName) => {
     if(fileName.split(".").pop() !== "js") return;

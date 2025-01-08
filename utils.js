@@ -33,26 +33,28 @@ const info = chalk.blue;
 const error = chalk.bold.bgBlack.red;
 
 async function getCookie(forceAsk) {
-    return new Promise(async (resolve) => {
-        var cookie = await findPassword("https://www.roblox.com:RobloxStudioAuth.ROBLOSECURITY");
+    // return new Promise(async (resolve) => {
+    //     var cookie = await findPassword("https://www.roblox.com:RobloxStudioAuth.ROBLOSECURITY");
 
-        if(!cookie || forceAsk === true) {
-            answer = await input_output.question(info(`${forceAsk !== true ? "Unable to find a ROBLOSECURITY. " : ""}Please enter your ROBLOSECURITY token below (or q to quit):\n`));
+    //     if(!cookie || forceAsk === true) {
+    //         answer = await input_output.question(info(`${forceAsk !== true ? "Unable to find a ROBLOSECURITY. " : ""}Please enter your ROBLOSECURITY token below (or q to quit):\n`));
             
-            if(answer.substring(0, token_warning.length) == token_warning) {
-                cookie = answer;
-            } else if(answer == "q") {
-                resolve([false]);
-                process.exit(1);
-            } else {
-                console.log(warning(`Provided ROBLOSECURITY did not include warning. Please retry with the ${token_warning} included.`));
-                resolve(await getCookie(true));
-                return;
-            }
-        }
+    //         if(answer.substring(0, token_warning.length) == token_warning) {
+    //             cookie = answer;
+    //         } else if(answer == "q") {
+    //             resolve([false]);
+    //             process.exit(1);
+    //         } else {
+    //             console.log(warning(`Provided ROBLOSECURITY did not include warning. Please retry with the ${token_warning} included.`));
+    //             resolve(await getCookie(true));
+    //             return;
+    //         }
+    //     }
 
-        resolve([true, cookie]);
-    });
+    //     resolve([true, cookie]);
+    // });
+
+    return findPassword("https://www.roblox.com:RobloxStudioAuth.ROBLOSECURITY");
 };
 
 function generateSessionToken(userId) {
