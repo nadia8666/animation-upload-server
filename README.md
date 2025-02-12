@@ -1,35 +1,51 @@
-# animation-upload-server
+<div align="center">
+  <img src="/icons/BulkAnimationUpload.png" width=250 height=250></img>
+  <h1>animation-upload-server</h1>
 
-This is the open source server for the Bulk Animation Upload plugin.
+  <p>The open source backend server for the ROBLOX Studio Bulk Animation Upload plugin</p>
+</div>
+<br />
+<h1>🔨 Installation</h1>
+<p>Head over to the <a href="https://github.com/iiPotatoFlamesii/animation-upload-server/releases">releases page</a> and download the latest version.
 
-## Installation
+After downloading, extract it to wherever you'd like, and run the executable inside.
 
-Head over to the [release page](https://github.com/iiPotatoFlamesii/animation-upload-server/releases) and install the latest version.
-You can either choose to use a [installer](#installed-version), or use a [portable version](#portable-version). Both of these version will work, but it is recommended that you use the installer as it will automatically update whenever a new update is released.
+Want to run it from the source? Head over to the <a href="#running-locally">running locally</a> section!</p>
 
+<h1>💻 Usage</h1>
+<h3>General Usage</h3>
+Once started, the server will show up as a tray item. On Windows, this will be located on the taskbar, typically in the bottom right, and on MacOS, this will show up in the top bar. Clicking this tray item will cause the Server menu to show up.<br /><br />
 
-If you would like to build this project yourself from the source, head to the [building section](#building). Alternatively, if you would like to run this project locally, head to the [running locally section](#running-locally).
+The server will, by default, attempt to host on <strong>port 25037</strong>. In the case that this isn't available, it will use another open port. This port can be viewed at the top of the Server menu, under <strong>Hosted Port: xxxxx</strong>. You can click this button to copy the hosted port, which you can then paste into the plugin in order to connect. Below this, you'll see a status label that shows the current status of the server. A status of <strong>Unverified</strong> indicates that the server is ready, but is not yet connected to the Studio plugin. After connecting, the status label should instead show the <strong>Ready</strong> status.
 
-## Usage
+<h3>Settings</h3>
+Currently, there are a few QoL settings in the server. First, and most useful, is the <strong>Run at Startup</strong> setting. This makes it so that everytime you start your computer, the server silently opens in the background, ready for any connections. When paired with the Studio plugin's Auto Connect feature, it makes the plugin usable right from the get-go, ready to import any and all animations.<br /><br />
 
-### Installed Version
+The other setting available at the moment is the <strong>Save instances locally</strong> setting. This setting will save all RBXM binaries that are uploaded to ROBLOX locally, which allows you to organize and keep a copy of each animation for easy re-importing. Once enabled, you are able to set it to any location (given that the location is writeable), and the server will do the rest. If you forgot where it is, there's also an option to open the location in the settings menu as well.
 
-Once you have installed the server, you can start the server and it will start a program in the background. It will create a tray item, which will allow you to access the port that the server is hosted on, and settings for the server.
+<h3>Running Locally</h3>
+<p>Interested in running the server from the source directly? Make sure you have at least <code>NodeJS v22.10.0 (LTS)</code> installed. Clone this repository and run <code>npm install</code> to install all packages. Finally, run <code>npm run start</code> to start the server! Do note that running from the source like this removes the <strong>Run at Startup</strong> feature due to the way Electron works.
 
-### Portable Version
+Make some changes, and want to build the executable yourself? Run <code>npm run make</code>, which will output the final executable into the <code>out</code> directory.</p>
 
-Extract the files and run the executable. This acts similarly to the installed version but will not update automatically, and the installation is stored wherever you store the portable version.
+<h1>🐛 Reporting Issues</h1>
+Run into an issue with the server? Report it at the <a href="https://github.com/iiPotatoFlamesii/animation-upload-server/issues">issues page</a>! If you received an Electron error, please take a screenshot of the error window. Please also upload a copy of your server logs, which can be accessed by pressing the <strong>Open Logs</strong> button on the server menu. This will help with solving any issues!
 
-### Multiple Logged in Users
+<h1>❓ FAQ</h1>
+<p><strong>Q: Why does the server need my <code>.ROBLOSECURITY</code> token? What is it used for?</strong></p>
+<p><strong>A:</strong> The server uses your <code>.ROBLOSECURITY</code> token for two things:
+  <ol>
+    <li>Uploading animations to ROBLOX</li>
+    <li>Getting which groups the user is able to upload assets to</li>
+  </ol>
+That's it! The reason why this server is open source is to show that this token is used only for these two purposes, and nothing else.
+</p>
 
-This server uses the NodeJS `keytar` package to read your `.ROBLOSECURITY` token, but this might fail if multiple users are logged in, or if one account is logged in on ROBLOX Studio and another on the ROBLOX homepage.
+<p><strong>Q: (MACOS) Why is the server asking for access to my Keychain?</strong></p>
+<p><strong>A:</strong> On MacOS, you might be asked to allow the server access to your Keychain. This is to get your <code>.ROBLOSECURITY</code> token, which is needed to upload animations.</p>
 
-~~In this case, in the verification process, it might ask you to manually enter your `.ROBLOSECURITY` token for the specified account.~~ _Deprecated, will expand upon in the future._
+<p><strong>Q: Which account is used to upload animations?</strong></p>
+<p><strong>A:</strong> The account that is <strong>currently logged into Studio</strong> is the account that will upload animations. Even if you are logged into a different account on the ROBLOX homepage, the account that is used is the one logged into Studio.</p>
 
-### Running Locally
-
-For users that have NodeJS already installed, or prefer to run locally from source, you may do so by cloning this repository and running `npm install` to run the packages, followed by `npm run start`. This code was written in Node v22.10.0 (LTS), so it is expected that you will have this version or newer in order to properly run this project locally.
-
-## Building
-
-This server was written in Node v22.10.0 (LTS), and as such it is expected that when building users will also be using this version, as packages or building may not properly work. In order to build, clone this repository, run `npm install` and either `npm run package` to make a portable version, or `npm run make` to make both the installer and portable versions.
+<p><strong>Q: Why does the server use my clipboard?</strong></p>
+<p><strong>A:</strong> The server uses your clipboard for integration with the ROBLOX Blender animation plugin. The blender animation plugin writes the encoded animation data to your clipboard, and when you import it in Studio, the server will grab the clipboard contents and attempt to de-encode it.</p>
