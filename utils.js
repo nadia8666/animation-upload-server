@@ -1,8 +1,12 @@
 const chalk = require("chalk");
 const readline = require("readline/promises");
+const fs = require("node:fs");
+const { appendFile: promiseAppend } = require("node:fs/promises");
+const { app: electronApp } = require("electron");
 const { randomBytes, createHash } = require("node:crypto");
 const { stdin: input, stdout: output } = require("node:process");
 const { findPassword } = require("keytar");
+const { join: joinPath } = require("node:path");
 
 const hashSalt = randomBytes(8);
 
@@ -10,6 +14,14 @@ const appSettings = {
     saveLocally: false,
     runAtStartup: true,
     localFilesLocation: ""
+}
+
+const electronUserDataPath = electronApp.getPath("userData");
+const electronLogFileName = (new Date().toISOString()).replace(/[/\\?%*:|"<>]/g, "-") + ".log";
+const electronLogFilePath = joinPath(electronUserDataPath, "logs", electronLogFileName);
+
+if(!fs.existsSync(joinPath(electronUserDataPath, "logs"))) {
+    fs.mkdirSync(joinPath(electronUserDataPath, "logs"));
 }
 
 const token_warning = "_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_";
@@ -28,9 +40,14 @@ const endpoints = {
     (groupId != null ? `&groupId=${groupId}` : ""),
 };
 
-const warning = chalk.bgYellow.black;
-const info = chalk.blue;
-const error = chalk.bold.bgBlack.red;
+const warning = (...a) => {writeToLogFile("[WARNING]: " + a.join(" ")); return chalk.bgYellow.black(a)};
+const info = (...a) => {writeToLogFile("[INFO]: " + a.join(" ")); return chalk.blue(a)};
+const error = (...a) => {writeToLogFile("[ERROR]: " + a.join(" ")); return chalk.bold.bgBlack.red(a)};
+
+function writeToLogFile(message) {
+    const date = new Date(); // theres gotta be a better way to record timestamps
+    return promiseAppend(electronLogFilePath, `[${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}] ${message}\n`);
+}
 
 async function getCookie(forceAsk) {
     // return new Promise(async (resolve) => {
@@ -129,6 +146,8 @@ exports.getSetting = getSetting;
 exports.setSetting = setSetting;
 exports.toggleSetting = toggleSetting;
 exports.getSettings = getSettings;
+
+exports.logFilePath = electronLogFilePath;
 
 exports.endpoints = endpoints;
 

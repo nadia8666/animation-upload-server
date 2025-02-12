@@ -2,7 +2,7 @@ const express = require("express");
 const fs = require("node:fs");
 const http = require("http");
 const { app: electronApp, clipboard, dialog, shell, Menu, Tray, nativeImage } = require("electron");
-const { info, warning, getSetting, setSetting, toggleSetting, getSettings } = require("./utils");
+const { info, warning, getSetting, setSetting, toggleSetting, getSettings, logFilePath } = require("./utils");
 const { join: joinPath, resolve: resolvePath } = require("node:path");
 const { raw, text } = require("body-parser");
 
@@ -71,11 +71,12 @@ expressApp.use((req, res, next) => {
 });
 
 expressApp.use(endpointData.raw, raw({
-    type: "text/plain"
+    type: "text/plain",
+    limit: "100mb"
 }));
 
 expressApp.use(endpointData.text, text({
-    type: "text/plain"
+    type: "text/plain",
 }));
 
 endpointModules.forEach((endpointModule) => {
@@ -98,11 +99,11 @@ function listenToPort(port) {
     const listener = httpServer
         .listen(port, () => {
             hostedPort = listener.address().port;
-            console.log(info("Listening on port %s"), hostedPort);
+            console.log(info(`Listening on port ${hostedPort}`));
         })
         .on("error", (err) => {
             if(err.code === "EADDRINUSE") {
-                console.log(warning("Port %s is unavailable, defaulting to unused port"), port);
+                console.log(warning(`Port ${port} is unavailable, defaulting to unused port`));
                 httpServer.listen();
             }
         });
@@ -110,9 +111,7 @@ function listenToPort(port) {
 
 listenToPort(defaultPort);
 
-electronApp.on("before-quit", () => {
-    // Save settings
-
+function electronSaveSettings() {
     const settings = getSettings();
     const loginItemSettings = {
         openAtLogin: settings.runAtStartup,
@@ -120,7 +119,7 @@ electronApp.on("before-quit", () => {
 
     electronApp.setLoginItemSettings(loginItemSettings);
     fs.writeFileSync(settingsPath, JSON.stringify(settings));
-});
+}
 
 electronApp.whenReady().then(() => {
     let previousSettings;
@@ -138,9 +137,9 @@ electronApp.whenReady().then(() => {
     }
 
     const settingsMenu = Menu.buildFromTemplate([
-        { label: "Run at startup", checked: true, type: "checkbox", id: "startup", click: () => toggleSetting("runAtStartup") },
+        { label: "Run at startup", checked: true, type: "checkbox", id: "startup", click: () => {toggleSetting("runAtStartup"); electronSaveSettings()} },
         { type: "separator" },
-        { label: "Save instances locally", checked: false, type: "checkbox", id: "saveInstances", click: () => toggleSetting("saveLocally") },
+        { label: "Save instances locally", checked: false, type: "checkbox", id: "saveInstances", click: () => {toggleSetting("runAtStartup"); electronSaveSettings()} },
         { label: "Set file location", enabled: false, id: "setLocation", click: () => {
             const directoryPath = dialog.showOpenDialogSync({
                 properties: ["openDirectory"]
@@ -172,11 +171,12 @@ electronApp.whenReady().then(() => {
         openLocationButton.enabled = saveInstancesLocally;
     }
 
-    const tray =  new Tray(nativeImage.createFromPath(joinPath(__dirname, "egm.ico")));
+    const tray =  new Tray(nativeImage.createFromPath(joinPath(__dirname, "icons", "BulkAnimationUpload.png")));
     const contextMenu = [
         { label: `Hosted Port: ${hostedPort}`, type: "normal", click: () => clipboard.writeText(String(hostedPort)) },
         { label: "Status: Unverified", enabled: false },
-        // { label: "Open Logs", type: "normal", click: () => shell.open },
+        { type: "separator" },
+        { label: "Open Logs", type: "normal", click: () => shell.openPath(logFilePath) },
         { type: "separator" },
         { label: "Settings", type: "submenu", submenu: settingsMenu },
         { type: "separator" },

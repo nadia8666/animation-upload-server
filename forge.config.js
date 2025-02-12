@@ -4,16 +4,10 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 module.exports = {
   packagerConfig: {
     asar: true,
-    icon: "./egm"
+    icon: "./icons/BulkAnimationUpload"
   },
   rebuildConfig: {},
   makers: [
-    {
-      name: '@electron-forge/maker-squirrel',
-      config: {
-        setupExe: "Setup.exe",
-      },
-    },
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin', "win32"],

@@ -6,7 +6,10 @@ const PluginId = 134443954464349;
 
 async function verify(req, res, args) {
     if(args.verified) {
-        console.log(warning("Verification request received despite ongoing session\nSession will be closed, but behavior may change"));
+        console.log(warning("Verification request received despite ongoing session\nServer Response: 418"));
+        res.status(418)
+            .send("Session is already running, close previous session.")
+        return;
     }
 
     closeSession(args);

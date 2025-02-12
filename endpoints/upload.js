@@ -148,8 +148,8 @@ async function upload(req, res, args) {
         uploadedAnimations[i] = {name: name, id: id};
     }
 
-        res.status(200)
-            .json(uploadedAnimations);
+    res.status(200)
+        .json(uploadedAnimations);
 }
 
 exports.handler = upload;
