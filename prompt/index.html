@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
+    <title>Animation Upload Server</title>
+    <style>
+        body {
+            background-color: #313131;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        #main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+            gap: 1em;
+        }
+
+        #titlebar {
+            position: absolute;
+            display: flex;
+            background-color: #202020;
+            width: 100vw;
+            height: 10vh;
+
+            align-items: center;
+            justify-content: center;
+
+            -webkit-app-region: drag;
+        }
+
+        .font {
+            font-family: "Ubuntu", serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 1em;
+            color: #ffffff;
+        }
+
+        input, label, button {
+            width: 80vw;
+        }
+
+        input, button {
+            background-color: #454545;
+            border: none;
+            border-radius: 5px;
+        }
+
+
+        label {
+            text-align: center;
+        }
+
+        button {
+            width: 40vw;
+            height: 20vh;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="titlebar"><p class="font">Animation Upload Server</p></div>
+    <div id="main">
+        <label for="roblosecurity" class="font">Enter your .ROBLOSECURITY Token</label>
+        <input type="text" id="roblosecurity" name="roblosecurity" class="font" required>
+
+        <button class="font" onclick="window.nodeServer.submitCookie(document.getElementById('roblosecurity').value)">Submit</button>
+    </div>
+</body>
+</html>

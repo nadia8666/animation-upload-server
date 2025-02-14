@@ -15,7 +15,6 @@
   "dependencies": {
     "body-parser": "2.0.2",
     "chalk": "4.1.2",
-    "electron-squirrel-startup": "^1.0.1",
     "express": "5.0.1",
     "keytar": "^7.9.0",
     "lz4-napi": "^2.8.0"

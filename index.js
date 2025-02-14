@@ -6,8 +6,6 @@ const { info, warning, getSetting, setSetting, toggleSetting, getSettings, logFi
 const { join: joinPath, resolve: resolvePath } = require("node:path");
 const { raw, text } = require("body-parser");
 
-if(require("electron-squirrel-startup")) return;
-
 const expressApp = express();
 const httpServer = http.createServer(expressApp);
 const defaultPort = 25037;
@@ -32,6 +30,7 @@ const sessionData = {
     "userId": null,
     "sessionToken": null,
     "timeoutId": null,
+    "animationQueue": null // replaced with a buffer when queued.
 };
 
 const files = fs.readdirSync(endpointPath);
@@ -72,7 +71,7 @@ expressApp.use((req, res, next) => {
 
 expressApp.use(endpointData.raw, raw({
     type: "text/plain",
-    limit: "100mb"
+    limit: "2mb"
 }));
 
 expressApp.use(endpointData.text, text({
@@ -120,6 +119,8 @@ function electronSaveSettings() {
     electronApp.setLoginItemSettings(loginItemSettings);
     fs.writeFileSync(settingsPath, JSON.stringify(settings));
 }
+
+electronApp.on("window-all-closed", () => {}); // prevent window-close from quitting app
 
 electronApp.whenReady().then(() => {
     let previousSettings;

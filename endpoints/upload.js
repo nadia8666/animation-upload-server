@@ -51,8 +51,8 @@ async function upload(req, res, args) {
 
     let canSaveLocally = shouldSaveLocally == true && pathExists(pathToSave);
 
-    const body = req.body;
-    if(body == undefined || !Buffer.isBuffer(body)) {
+    const animationBuffer = args.animationQueue;
+    if(animationBuffer == undefined || !Buffer.isBuffer(animationBuffer)) {
         res.status(400)
             .send("Missing Animation Buffer");
         console.log(error("E7: Passed Animation Buffer does not exist!\nServer Response: 400"));
@@ -67,38 +67,38 @@ async function upload(req, res, args) {
 
     let byteOffset = 0;
 
-    let numOfAnimations = body.readUintLE(byteOffset, 1);
+    let numOfAnimations = animationBuffer.readUintLE(byteOffset, 1);
     byteOffset++;
 
     const uploadedAnimations = [];
 
     for(var x = 0; x < numOfAnimations; x++) {
         const i = x;
-        let isGroupUpload = body.readUintLE(byteOffset, 1);
+        let isGroupUpload = animationBuffer.readUintLE(byteOffset, 1);
         byteOffset++;
 
         if(isGroupUpload == 1) {
-            let groupId = body.readBigUint64LE(byteOffset);
+            let groupId = animationBuffer.readBigUint64LE(byteOffset);
             byteOffset += 8;
 
             uploadParameters.groupId = groupId;
         }
 
-        let nameLength = body.readUintLE(byteOffset, 1);
+        let nameLength = animationBuffer.readUintLE(byteOffset, 1);
         byteOffset++;
 
-        const name = body.toString("utf8", byteOffset, byteOffset + nameLength);
+        const name = animationBuffer.toString("utf8", byteOffset, byteOffset + nameLength);
         byteOffset += nameLength;
 
         uploadParameters.title = name;
 
-        let animationDataLength = body.readUint32LE(byteOffset);
+        let animationDataLength = animationBuffer.readUint32LE(byteOffset);
         byteOffset += 4;
 
         console.log(info(`Uploading animation #${i + 1}: ${name}`));
 
         const uploadURL = endpoints.uploadAnimation(uploadParameters.title, uploadParameters.description, uploadParameters.groupId);
-        const animationData = body.subarray(byteOffset, byteOffset + animationDataLength);
+        const animationData = animationBuffer.subarray(byteOffset, byteOffset + animationDataLength);
 
         byteOffset += animationDataLength;
 
@@ -147,6 +147,8 @@ async function upload(req, res, args) {
 
         uploadedAnimations[i] = {name: name, id: id};
     }
+
+    args.animationQueue = null; // destroy the animation buffer
 
     res.status(200)
         .json(uploadedAnimations);

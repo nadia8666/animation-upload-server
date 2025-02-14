@@ -2,7 +2,8 @@ const fs = require("node:fs");
 const { warning, info, error, getCookie, endpoints, generateSessionToken, closeSession, getSetting } = require("../utils");
 const { join: joinPath } = require("node:path");
 
-const PluginId = 134443954464349;
+// const PluginId = 134443954464349;
+const PluginId = 0;
 
 async function verify(req, res, args) {
     if(args.verified) {

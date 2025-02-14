@@ -2,7 +2,7 @@ const chalk = require("chalk");
 const readline = require("readline/promises");
 const fs = require("node:fs");
 const { appendFile: promiseAppend } = require("node:fs/promises");
-const { app: electronApp } = require("electron");
+const { app: electronApp, BrowserWindow: electronWindow, ipcMain } = require("electron");
 const { randomBytes, createHash } = require("node:crypto");
 const { stdin: input, stdout: output } = require("node:process");
 const { findPassword } = require("keytar");
@@ -49,29 +49,39 @@ function writeToLogFile(message) {
     return promiseAppend(electronLogFilePath, `[${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}] ${message}\n`);
 }
 
-async function getCookie(forceAsk) {
-    // return new Promise(async (resolve) => {
-    //     var cookie = await findPassword("https://www.roblox.com:RobloxStudioAuth.ROBLOSECURITY");
+function getCookie(forceAsk) {
+    return new Promise(async (resolve) => {
+        var cookie = await findPassword("https://www.roblox.com:RobloxStudioAuth.ROBLOSECURITY");
 
-    //     if(!cookie || forceAsk === true) {
-    //         answer = await input_output.question(info(`${forceAsk !== true ? "Unable to find a ROBLOSECURITY. " : ""}Please enter your ROBLOSECURITY token below (or q to quit):\n`));
-            
-    //         if(answer.substring(0, token_warning.length) == token_warning) {
-    //             cookie = answer;
-    //         } else if(answer == "q") {
-    //             resolve([false]);
-    //             process.exit(1);
-    //         } else {
-    //             console.log(warning(`Provided ROBLOSECURITY did not include warning. Please retry with the ${token_warning} included.`));
-    //             resolve(await getCookie(true));
-    //             return;
-    //         }
-    //     }
+        if(cookie !== null) return resolve(cookie);
 
-    //     resolve([true, cookie]);
-    // });
+        var promptWindow = new electronWindow({
+            width: 500,
+            height: 200,
+            frame: false,
+            title: "Animation Upload Server",
 
-    return findPassword("https://www.roblox.com:RobloxStudioAuth.ROBLOSECURITY");
+            webPreferences: {
+                preload: joinPath(__dirname, "prompt", "preload.js")
+            },
+
+            alwaysOnTop: true,
+            maximizable: false,
+            resizable: false
+        })
+
+        promptWindow.loadFile(joinPath(__dirname, "prompt", "index.html"));
+
+        ipcMain.once("submitCookie", (event, cookie) => {
+            promptWindow.close();
+
+            if(typeof cookie !== "string") return resolve(null);
+
+            if(cookie.substring(0, token_warning.length) != token_warning) return resolve(null);
+
+            resolve(cookie);
+        })
+    })
 };
 
 function generateSessionToken(userId) {
@@ -119,6 +129,7 @@ function closeSession(args) {
     args.token = null;
     args.userId = null;
     args.timeoutId = null;
+    args.animationQueue = null;
 }
 
 function getSetting(setting) {
