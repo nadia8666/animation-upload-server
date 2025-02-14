@@ -1,10 +1,8 @@
 const chalk = require("chalk");
-const readline = require("readline/promises");
 const fs = require("node:fs");
 const { appendFile: promiseAppend } = require("node:fs/promises");
 const { app: electronApp, BrowserWindow: electronWindow, ipcMain } = require("electron");
 const { randomBytes, createHash } = require("node:crypto");
-const { stdin: input, stdout: output } = require("node:process");
 const { findPassword } = require("keytar");
 const { join: joinPath } = require("node:path");
 
@@ -25,8 +23,6 @@ if(!fs.existsSync(joinPath(electronUserDataPath, "logs"))) {
 }
 
 const token_warning = "_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_";
-
-const input_output = readline.createInterface({ input, output });
 
 const endpoints = {
     "getAllGroups": (userId) => `https://groups.roblox.com/v1/users/${userId}/groups/roles`,
@@ -55,6 +51,8 @@ function getCookie(forceAsk) {
 
         if(cookie !== null) return resolve(cookie);
 
+        let hasResolved = false;
+
         var promptWindow = new electronWindow({
             width: 500,
             height: 200,
@@ -72,7 +70,15 @@ function getCookie(forceAsk) {
 
         promptWindow.loadFile(joinPath(__dirname, "prompt", "index.html"));
 
+        promptWindow.once("close", () => {
+            if(hasResolved == false) resolve(null);
+
+            ipcMain.removeAllListeners("submitCookie");
+        })
+
         ipcMain.once("submitCookie", (event, cookie) => {
+            hasResolved = true;
+
             promptWindow.close();
 
             if(typeof cookie !== "string") return resolve(null);

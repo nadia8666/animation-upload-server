@@ -1,7 +1,7 @@
 // /compress endpoint is used for compressing chunk data in the ROBLOX binary format; there is no native LUA package for LZ4 compression, so we use an endpoint instead
 
 const { compressSync } = require("lz4-napi");
-const { warning, info, error } = require("../utils");
+const { error } = require("../utils");
 
 function compress(req, res) {
     const body = req.body;
@@ -12,23 +12,31 @@ function compress(req, res) {
         return;
     }
 
-    // const outputSize = lz4.encodeBound(body.length);
-    // if(outputSize == 0) {
-    //     res.status(500)
-    //         .send("Input data is too large");
-    //     console.log(error("E1: Passed chunk data is too large!\nServer Response: 500"));
-    //     return;
-    // }
+    let numOfChunks = body.readUIntLE(0, 1);
+    let currentOffset = 1;
 
-    // let lz4Output = Buffer.alloc(outputSize);
-    // let compressedSize = lz4.encodeBlock(body, lz4Output);
+    let compressedChunks = [];
 
-    // lz4Output = lz4Output.subarray(0, compressedSize);
+    for(var i = 0; i < numOfChunks; i++) {
+        let chunkSize = body.readUInt32LE(currentOffset);
+        currentOffset += 4;
 
-    let lz4Output = compressSync(body).subarray(4); // lz4-napi prepends the compressed buffer with the size of the original input, which is unneeded in our case
+        let toCompress = body.subarray(currentOffset, currentOffset + chunkSize);
+
+        let lz4Output = compressSync(toCompress).subarray(4); // lz4-napi prepends the compressed buffer with the size of the original input, which is unneeded in our case
+
+        let sizeBuffer = Buffer.alloc(4);
+        sizeBuffer.writeUInt32LE(lz4Output.length);
+
+        compressedChunks.push(sizeBuffer, lz4Output);
+
+        currentOffset += chunkSize;
+    }
+
+    const finalOutput = Buffer.concat(compressedChunks);
 
     res.status(200)
-        .send(lz4Output);
+        .send(finalOutput);
 };
 
 exports.handler = compress;

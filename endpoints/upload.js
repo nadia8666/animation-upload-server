@@ -59,6 +59,8 @@ async function upload(req, res, args) {
         return;
     }
 
+    args.animationQueue = null; // gc the animation buffer
+
     let uploadParameters = {
         groupId: null,
         title: null,
@@ -147,8 +149,6 @@ async function upload(req, res, args) {
 
         uploadedAnimations[i] = {name: name, id: id};
     }
-
-    args.animationQueue = null; // destroy the animation buffer
 
     res.status(200)
         .json(uploadedAnimations);

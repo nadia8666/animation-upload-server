@@ -1,4 +1,4 @@
-const { isRequestCSRFVerified, warning, error, info } = require("../utils");
+const { isRequestCSRFVerified, error } = require("../utils");
 
 function handler(req, res, args) {
     const isVerified = args.verified;
@@ -28,13 +28,7 @@ function handler(req, res, args) {
     let queued = args.animationQueue;
     if(queued == null || !Buffer.isBuffer(queued)) queued = Buffer.alloc(0);
 
-    const inputSize = body.length;
-
-    // reallocate to fit input in
-
-    const newAnimationQueue = Buffer.alloc(queued.length + inputSize);
-    queued.copy(newAnimationQueue);
-    body.copy(newAnimationQueue, queued.length);
+    const newAnimationQueue = Buffer.concat([queued, body]);
 
     args.animationQueue = newAnimationQueue;
 
