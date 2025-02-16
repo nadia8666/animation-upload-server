@@ -50,7 +50,8 @@ jobs:
     - name: Zip Binaries
       run: |
         mkdir mac_build
-        cp -r out/make/zip/darwin/x64/*.zip mac_build/mac.zip
+        ls
+        cp -r out/make mac_build
     - name: Upload Binaries
       uses: actions/upload-artifact@v4.4.3
       with:
@@ -74,5 +75,4 @@ jobs:
          token: ${{ secrets.RELEASE_TOKEN_TEST }}
          files: |
             ./artifacts/windows/windows.zip
-            ./artifacts/mac/mac.zip
         
