@@ -133,7 +133,7 @@ async function upload(req, res, args) {
             let serverError = await uploadRequest.text();
             // res.status(500)
             //     .send(`RAPI ERROR: ${serverError}`);
-            console.log(warn(`RAPI ERROR: ${serverError}`));
+            console.log(warn(`Animation #${i + 1} RAPI ERROR: ${serverError}`));
             continue;
         }
 
