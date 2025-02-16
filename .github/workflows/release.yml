@@ -34,7 +34,7 @@ jobs:
         name: windows
         path: windows_build
 
-  build_on_mac_aarm:
+  build_on_mac_arm:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
     - name: Zip Binaries
       run: |
         mkdir mac_build
-        cp -r out/make/zip/darwin/aarm64/*.zip mac_build/mac_aarm.zip
+        cp -r out/make/zip/darwin/arm64/*.zip mac_build/mac_arm.zip
     - name: Upload Binaries
       uses: actions/upload-artifact@v4.4.3
       with:
@@ -81,7 +81,7 @@ jobs:
         path: mac_build
    
   releases:
-    needs: [build_on_windows, build_on_mac_aarm, build_on_mac_x86]
+    needs: [build_on_windows, build_on_mac_arm, build_on_mac_x86]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -97,6 +97,6 @@ jobs:
          token: ${{ secrets.RELEASE_TOKEN_TEST }}
          files: |
             ./artifacts/windows/windows.zip
-            ./artifacts/mac/mac_aarm.zip
+            ./artifacts/mac/mac_arm.zip
             ./artifacts/mac_x64/mac_x64.zip
         
