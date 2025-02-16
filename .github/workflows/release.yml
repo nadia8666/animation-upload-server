@@ -27,17 +27,38 @@ jobs:
     - name: Zip Binaries
       run: |
         mkdir windows_build
-        mkdir windows_build/windows_installer
-        cp -r out/make/squirrel.windows/x64/* windows_build/windows_installer
-        cp -r out/make/zip/win32/x64/*.zip windows_build/windows_portable.zip
+        cp -r out/make/zip/win32/x64/*.zip windows_build/windows.zip
     - name: Upload Binaries
       uses: actions/upload-artifact@v4.4.3
       with:
         name: windows
         path: windows_build
+
+  build_on_mac:
+    runs-on: macOS
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.10.0'
+        cache: 'npm'
+    - name: Build Project
+      run: |
+        npm ci
+        npm run make
+    - name: Zip Binaries
+      run: |
+        mkdir mac_build
+        cp -r out/make/zip/darwin/x64/*.zip mac_build/mac.zip
+    - name: Upload Binaries
+      uses: actions/upload-artifact@v4.4.3
+      with:
+        name: mac
+        path: mac_build
    
   releases:
-    needs: [build_on_windows]
+    needs: [build_on_windows, build_on_mac]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -46,16 +67,12 @@ jobs:
         uses: actions/download-artifact@v4.1.8
         with:
           path: ./artifacts
-      - name: Zip Win_Installer
-        run: |
-          cd ./artifacts/windows
-          zip -jr windows_installer.zip windows_installer/*
       - name: Upload to Releases
         uses: softprops/action-gh-release@v2.1.0
         with:
          draft: true
          token: ${{ secrets.RELEASE_TOKEN_TEST }}
          files: |
-            ./artifacts/windows/windows_installer.zip
-            ./artifacts/windows/windows_portable.zip
+            ./artifacts/windows/windows.zip
+            ./artifacts/mac/mac.zip
         
