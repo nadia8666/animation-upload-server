@@ -35,7 +35,7 @@ jobs:
         path: windows_build
 
   build_on_mac:
-    runs-on: macOS
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js
