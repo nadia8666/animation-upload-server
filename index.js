@@ -35,14 +35,20 @@ const sessionData = {
 
 const files = fs.readdirSync(endpointPath);
 
+let trayImagePath;
+
 if(platform === "darwin") {
     let path = joinPath(electronApp.getPath("documents"), "Roblox");
+
+    trayImagePath = joinPath(__dirname, "icons", "iconTemplate.png");
     
     if(!fs.existsSync(path)) throw new Error("Failed to find platform DARWIN path. Please report on GitHub.");
 
     setSetting("pluginData", path);
 } else {
     let path = resolvePath(process.env.LOCALAPPDATA, "Roblox");
+
+    trayImagePath = joinPath(__dirname, "icons", "icon.png");
 
     if(!fs.existsSync(path)) throw new Error("Failed to find platform WIN32 path. Please report on GitHub.");
 
@@ -172,7 +178,7 @@ electronApp.whenReady().then(() => {
         openLocationButton.enabled = saveInstancesLocally;
     }
 
-    const tray =  new Tray(nativeImage.createFromPath(joinPath(__dirname, "icons", "BulkAnimationUpload.png")));
+    const tray =  new Tray(nativeImage.createFromPath(trayImagePath));
     const contextMenu = [
         { label: `Hosted Port: ${hostedPort}`, type: "normal", click: () => clipboard.writeText(String(hostedPort)) },
         { label: "Status: Unverified", enabled: false },
