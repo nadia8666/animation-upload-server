@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="/icons/BulkAnimationUpload.png" width=250 height=250></img>
+  <img src="/icons/icon.png" width=250 height=250></img>
   <h1>animation-upload-server</h1>
 
   <p>The open source backend server for the ROBLOX Studio Bulk Animation Upload plugin</p>
@@ -48,4 +48,4 @@ That's it! The reason why this server is open source is to show that this token 
 <p><strong>A:</strong> The account that is <strong>currently logged into Studio</strong> is the account that will upload animations. Even if you are logged into a different account on the ROBLOX homepage, the account that is used is the one logged into Studio.</p>
 
 <p><strong>Q: Why does the server use my clipboard?</strong></p>
-<p><strong>A:</strong> The server uses your clipboard for integration with the ROBLOX Blender animation plugin. The blender animation plugin writes the encoded animation data to your clipboard, and when you import it in Studio, the server will grab the clipboard contents and attempt to de-encode it.</p>
+<p><strong>A:</strong> The server uses your clipboard for integration with the ROBLOX Blender animation plugin. The blender animation plugin writes the encoded animation data to your clipboard, and when you import it in Studio, the server will grab the clipboard contents and attempt to decode it.</p>
