@@ -128,11 +128,9 @@ function electronSaveSettings() {
 
 electronApp.on("window-all-closed", () => {}); // prevent window-close from quitting app
 
-electronApp.on("quit", () => electronSaveSettings);
-
 electronApp.whenReady().then(() => {
     if(!fs.existsSync(settingsPath)) {
-        fs.writeFileSync(settingsPath, "{}");
+        electronSaveSettings();
     }
 
     const previousSettings = JSON.parse(fs.readFileSync(settingsPath));
@@ -146,7 +144,7 @@ electronApp.whenReady().then(() => {
     const settingsMenu = Menu.buildFromTemplate([
         { label: "Run at startup", checked: true, type: "checkbox", id: "startup", click: () => {toggleSetting("runAtStartup"); electronSaveSettings()} },
         { type: "separator" },
-        { label: "Save instances locally", checked: false, type: "checkbox", id: "saveInstances", click: () => {toggleSetting("runAtStartup"); electronSaveSettings()} },
+        { label: "Save instances locally", checked: false, type: "checkbox", id: "saveInstances", click: () => {toggleSetting("saveLocally"); electronSaveSettings()} },
         { label: "Set file location", enabled: false, id: "setLocation", click: () => {
             const directoryPath = dialog.showOpenDialogSync({
                 properties: ["openDirectory"]
