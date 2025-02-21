@@ -45,9 +45,27 @@ function writeToLogFile(message) {
     return promiseAppend(electronLogFilePath, `[${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}:${String(date.getSeconds()).padStart(2, "0")}] ${message}\n`);
 }
 
-function getCookie(forceAsk) {
+function getCookie() {
     return new Promise(async (resolve) => {
-        var cookie = await findPassword("https://www.roblox.com:RobloxStudioAuth.ROBLOSECURITY");
+        var cookie;
+
+        // thanks to evaera/roblox-animation-transfer for this code
+        if (process.platform === "darwin") {
+            const homePath = electronApp.getPath("home");
+            const binaryCookiePath = joinPath(homePath, "Library/HTTPStorages/com.Roblox.RobloxStudio.binarycookies");
+
+            if(fs.existsSync(binaryCookiePath)) {
+                const binaryCookieData = fs.readFileSync(binaryCookiePath, { encoding: "utf-8" });
+        
+                const matchGroups = binaryCookieData.match(/_\|WARNING:-DO-NOT-SHARE-THIS\.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items\.\|_[A-F\d]+/)
+        
+                if(matchGroups !== null && matchGroups.length > 0) {
+                    cookie = matchGroups[0];
+                }
+            }
+        } else {
+            cookie = await findPassword("https://www.roblox.com:RobloxStudioAuth.ROBLOSECURITY");
+        }
 
         if(cookie !== null) return resolve(cookie);
 
