@@ -129,13 +129,11 @@ function electronSaveSettings() {
 electronApp.on("window-all-closed", () => {}); // prevent window-close from quitting app
 
 electronApp.whenReady().then(() => {
-    let previousSettings;
+    if(!fs.existsSync(settingsPath)) {
+        fs.writeFileSync(settingsPath, "{}");
+    }
 
-    try {
-        previousSettings = JSON.parse(fs.readFileSync(settingsPath));
-    } catch (e) {
-        console.log(e);
-    };
+    const previousSettings = JSON.parse(fs.readFileSync(settingsPath));
 
     if(previousSettings) {
         for(var [key, value] of Object.entries(previousSettings)) {
@@ -199,8 +197,6 @@ electronApp.whenReady().then(() => {
         
         tray.setContextMenu(menu);
         tray.popUpContextMenu();
-
-        tray.setContextMenu(null);
     }
 
     tray.setToolTip("Animation Server");

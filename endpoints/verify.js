@@ -17,7 +17,7 @@ async function verify(req, res, args) {
     console.log(info("Received verification request..."));
 
     const body = req.body;
-    if(body.length == 0) {
+    if(body == null || body.length == 0) {
         res.status(400)
             .send("No UserId specified");
         console.log(error("E3: No UserId passed!\nServer Response: 400"));
@@ -32,9 +32,10 @@ async function verify(req, res, args) {
         return;
     }
 
-    const pluginDataPath = joinPath(getSetting("pluginData"), String(clientUserId), "InstalledPlugins", String(PluginId))
+    const pluginDataPath = joinPath(getSetting("pluginData"), String(clientUserId), "InstalledPlugins", String(PluginId));
+    const rawPluginSettingsPath = joinPath(pluginDataPath, "settings.json");
 
-    if(!fs.existsSync(pluginDataPath)) {
+    if(!fs.existsSync(pluginDataPath) || !fs.existsSync(rawPluginSettingsPath)) {
         res.status(400)
             .send("UserId specified does not own the plugin");
         console.log(error("E20: User does not own the plugin.\nServer Response: 400"));
@@ -42,7 +43,7 @@ async function verify(req, res, args) {
     }
 
     const userToken = req.get("bau-x-request-token");
-    const rawPluginSettings = fs.readFileSync(joinPath(pluginDataPath, "settings.json"));
+    const rawPluginSettings = fs.readFileSync(rawPluginSettingsPath);
     const pluginSettings = JSON.parse(rawPluginSettings);
 
     if(pluginSettings.BulkAnimationUpload_RequestToken !== userToken) {

@@ -5,7 +5,7 @@ const { error } = require("../utils");
 
 function compress(req, res) {
     const body = req.body;
-    if(body == undefined || !Buffer.isBuffer(body)) {
+    if(body == null || !Buffer.isBuffer(body)) {
         res.status(400)
             .send("Missing chunk data");
         console.log(error("E2: Passed chunk data does not exist!\nServer Response: 400"));

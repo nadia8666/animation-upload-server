@@ -52,7 +52,7 @@ async function upload(req, res, args) {
     let canSaveLocally = shouldSaveLocally == true && pathExists(pathToSave);
 
     const animationBuffer = args.animationQueue;
-    if(animationBuffer == undefined || !Buffer.isBuffer(animationBuffer)) {
+    if(animationBuffer == null || !Buffer.isBuffer(animationBuffer)) {
         res.status(400)
             .send("Missing Animation Buffer");
         console.log(error("E7: Passed Animation Buffer does not exist!\nServer Response: 400"));

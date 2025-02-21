@@ -3,8 +3,6 @@
 const { warning, info, error, generateSessionToken, isRequestCSRFVerified, closeSession } = require("../utils");
 
 async function handshake(req, res, args) {
-    const body = req.body;
-
     if(!args.verified) {
         res.status(401)
             .send("Currently unverified");
