@@ -128,6 +128,8 @@ function electronSaveSettings() {
 
 electronApp.on("window-all-closed", () => {}); // prevent window-close from quitting app
 
+electronApp.on("quit", () => electronSaveSettings);
+
 electronApp.whenReady().then(() => {
     if(!fs.existsSync(settingsPath)) {
         fs.writeFileSync(settingsPath, "{}");
