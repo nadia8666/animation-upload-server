@@ -41,8 +41,8 @@ Run into an issue with the server? Report it at the <a href="https://github.com/
 That's it! The reason why this server is open source is to show that this token is used only for these two purposes, and nothing else.
 </p>
 
-<p><strong>Q: (MACOS) Why is the server asking for access to my Keychain?</strong></p>
-<p><strong>A:</strong> On MacOS, you might be asked to allow the server access to your Keychain. This is to get your <code>.ROBLOSECURITY</code> token, which is needed to upload animations.</p>
+<p><strong>Q: (MACOS) Why is the server asking for access to my Documents/Library?</strong></p>
+<p><strong>A:</strong> On MacOS, you might be asked to allow the server access to your Documents and/or Library. This is to get your <code>.ROBLOSECURITY</code> token, which is needed to upload animations.</p>
 
 <p><strong>Q: Which account is used to upload animations?</strong></p>
 <p><strong>A:</strong> The account that is <strong>currently logged into Studio</strong> is the account that will upload animations. Even if you are logged into a different account on the ROBLOX homepage, the account that is used is the one logged into Studio.</p>

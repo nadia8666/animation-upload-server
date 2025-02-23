@@ -93,8 +93,7 @@ jobs:
       - name: Upload to Releases
         uses: softprops/action-gh-release@v2.1.0
         with:
-         draft: true
-         token: ${{ secrets.RELEASE_TOKEN_TEST }}
+         generate_release_notes: true
          files: |
             ./artifacts/windows/windows.zip
             ./artifacts/mac/mac_arm.zip

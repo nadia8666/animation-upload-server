@@ -4,17 +4,27 @@ const { join: joinPath } = require("node:path");
 
 const PluginId = 134443954464349;
 
+const AcceptedVersion = "1"; // version control in case there are any breaking API changes.
+
 async function verify(req, res, args) {
     if(args.verified) {
-        console.log(warning("Verification request received despite ongoing session\nServer Response: 418"));
         res.status(418)
-            .send("Session is already running, close previous session.")
+            .send("Session is already running, close previous session.");
+        console.log(error("Verification request received despite ongoing session\nServer Response: 418"));
         return;
     }
 
     closeSession(args);
 
     console.log(info("Received verification request..."));
+
+    const ClientVersion = req.get("bau-plugin-version");
+    if(ClientVersion !== AcceptedVersion) {
+        res.status(500)
+            .send("Outdated Animation Server, update to new Animation Server version.");
+        console.log(error("Plugin request does not match the given version of Animation Server.\nServer Response: 500"));
+        return;
+    }
 
     const body = req.body;
     if(body == null || body.length == 0) {
