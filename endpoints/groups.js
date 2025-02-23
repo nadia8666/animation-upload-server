@@ -34,7 +34,9 @@ function getValidGroups(cookie, groupData) {
                         resolve(groups);
                     }
                 })
-            })
+            }).catch((e) => {
+                console.log(warning(`Failed to retrieve group permissions for group ${groupId} (${roleId}): ${e.name} (${e.message})`))
+            });
         });
     })
 }

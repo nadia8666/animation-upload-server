@@ -76,11 +76,21 @@ async function verify(req, res, args) {
         args.token = cookie;
     }
 
-    const authenticatedRequest = await fetch(endpoints.authentication, {
-        headers: {
-            cookie: `.ROBLOSECURITY=${args.token}`
-        }
-    });
+    let authenticatedRequest;
+
+    try {
+        authenticatedRequest = await fetch(endpoints.authentication, {
+            headers: {
+                cookie: `.ROBLOSECURITY=${args.token}`
+            }
+        });
+    } catch(e) {
+        res.status(500)
+            .send("Unable to authorize with cookie");
+        console.log(error(`E27: Unable to send account authorization request! ${e.name} (${e.message})`));
+        return;
+    }
+
     if(authenticatedRequest.status !== 200) {
         res.status(500)
             .send("Unable to authorize with cookie");

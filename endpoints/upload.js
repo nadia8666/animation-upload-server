@@ -26,14 +26,19 @@ async function upload(req, res, args) {
     }
 
     if(!csrfToken) {
-        const csrfRequest = await fetch(endpoints.logout, {
-            method: "POST",
-            headers: {
-                cookie: `.ROBLOSECURITY=${RBX_Cookie}`
-            }
-        });
+        try {
+            const csrfRequest = await fetch(endpoints.logout, {
+                method: "POST",
+                headers: {
+                    cookie: `.ROBLOSECURITY=${RBX_Cookie}`
+                }
+            });
 
-        csrfToken = csrfRequest.headers.get("x-csrf-token");
+            csrfToken = csrfRequest.headers.get("x-csrf-token");
+        } catch(e) {
+            console.log(error(`E26: X-CSRF-TOKEN request failed: ${e.name} (${e.message})`))
+        }
+
         if(!csrfToken) {
             res.status(500)
                 .send("Unable to retrieve X-CSRF-Token");
@@ -118,16 +123,24 @@ async function upload(req, res, args) {
             continue;
         }
 
-        const uploadRequest = await fetch(uploadURL, {
-            method: "POST",
-            headers: {
-                cookie: `.ROBLOSECURITY=${RBX_Cookie}`,
-                "User-Agent": "RobloxStudio/WinInet",
-                "Content-Type": "application/octet-stream",
-                "X-CSRF-Token": csrfToken
-            },
-            body: animationData
-        });
+        let uploadRequest;
+        
+        try {
+            uploadRequest = await fetch(uploadURL, {
+                method: "POST",
+                headers: {
+                    cookie: `.ROBLOSECURITY=${RBX_Cookie}`,
+                    "User-Agent": "RobloxStudio/WinInet",
+                    "Content-Type": "application/octet-stream",
+                    "X-CSRF-Token": csrfToken
+                },
+                body: animationData,
+                signal: AbortSignal.timeout(5000)
+            });
+        } catch(e) {
+            console.log(error(`E25: Animation #${i + 1} failed to upload due to ${e.name} (${e.message})`));
+            continue;
+        }
 
         if(uploadRequest.status !== 200) {
             let serverError = await uploadRequest.text();
