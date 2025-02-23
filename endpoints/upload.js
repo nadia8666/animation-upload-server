@@ -135,7 +135,7 @@ async function upload(req, res, args) {
                     "X-CSRF-Token": csrfToken
                 },
                 body: animationData,
-                signal: AbortSignal.timeout(5000)
+                signal: AbortSignal.timeout(10000)
             });
         } catch(e) {
             console.log(error(`E25: Animation #${i + 1} failed to upload due to ${e.name} (${e.message})`));
