@@ -21,7 +21,7 @@ async function verify(req, res, args) {
     const ClientVersion = req.get("bau-plugin-version");
     if(ClientVersion !== AcceptedVersion) {
         res.status(500)
-            .send("Outdated Animation Server, update to new Animation Server version.");
+            .send(`Outdated version. Animation Server Version: ${AcceptedVersion}. Plugin Version: ${ClientVersion}.`);
         console.log(error("Plugin request does not match the given version of Animation Server.\nServer Response: 500"));
         return;
     }
