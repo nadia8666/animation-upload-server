@@ -3,25 +3,27 @@
 const { compressSync } = require("lz4-napi");
 const { error } = require("../utils");
 
-function compress(req, res) {
-    const body = req.body;
-    if(body == null || !Buffer.isBuffer(body)) {
+function compress(req, res, args) {
+    const compressionQueue = args.compressionQueue;
+    if(compressionQueue == null || !Buffer.isBuffer(compressionQueue)) {
         res.status(400)
             .send("Missing chunk data");
         console.log(error("E2: Passed chunk data does not exist!\nServer Response: 400"));
         return;
     }
 
-    let numOfChunks = body.readUIntLE(0, 1);
+    args.compressionQueue = null; // gc the compression buffer
+
+    let numOfChunks = compressionQueue.readUIntLE(0, 1);
     let currentOffset = 1;
 
     let compressedChunks = [];
 
     for(var i = 0; i < numOfChunks; i++) {
-        let chunkSize = body.readUInt32LE(currentOffset);
+        let chunkSize = compressionQueue.readUInt32LE(currentOffset);
         currentOffset += 4;
 
-        let toCompress = body.subarray(currentOffset, currentOffset + chunkSize);
+        let toCompress = compressionQueue.subarray(currentOffset, currentOffset + chunkSize);
 
         let lz4Output = compressSync(toCompress).subarray(4); // lz4-napi prepends the compressed buffer with the size of the original input, which is unneeded in our case
 

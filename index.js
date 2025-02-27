@@ -30,7 +30,8 @@ const sessionData = {
     "userId": null,
     "sessionToken": null,
     "timeoutId": null,
-    "animationQueue": null // replaced with a buffer when queued.
+    "animationQueue": null, // replaced with a buffer when queued
+    "compressionQueue": null, // same as above
 };
 
 const files = fs.readdirSync(endpointPath);
@@ -139,6 +140,11 @@ electronApp.whenReady().then(() => {
         for(var [key, value] of Object.entries(previousSettings)) {
             setSetting(key, value);
         }
+    }
+
+    let loginSettings = electronApp.getLoginItemSettings();
+    if(loginSettings) {
+        setSetting("runAtStartup", loginSettings.openAtLogin);
     }
 
     const settingsMenu = Menu.buildFromTemplate([
