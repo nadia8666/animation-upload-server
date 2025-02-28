@@ -43,8 +43,6 @@ async function verify(req, res, args) {
     }
 
     const userToken = req.get("bau-x-request-token");
-    const rawPluginSettings = fs.readFileSync(rawPluginSettingsPath);
-    const pluginSettings = JSON.parse(rawPluginSettings);
 
     if(!args.token) {
         let cookie = await getCookie();
