@@ -42,27 +42,9 @@ async function verify(req, res, args) {
         return;
     }
 
-    const pluginDataPath = joinPath(getSetting("pluginData"), String(clientUserId), "InstalledPlugins", String(PluginId));
-    const rawPluginSettingsPath = joinPath(pluginDataPath, "settings.json");
-
-    if(!fs.existsSync(pluginDataPath) || !fs.existsSync(rawPluginSettingsPath)) {
-        res.status(400)
-            .send("UserId specified does not own the plugin");
-        console.log(error("E20: User does not own the plugin.\nServer Response: 400"));
-        return;
-    }
-
     const userToken = req.get("bau-x-request-token");
     const rawPluginSettings = fs.readFileSync(rawPluginSettingsPath);
     const pluginSettings = JSON.parse(rawPluginSettings);
-
-    if(pluginSettings.BulkAnimationUpload_RequestToken !== userToken) {
-        res.status(400)
-            .send("Malicious plugin request");
-        console.log(error("E21: Plugin request token does not match given request token. Assumed to be a malicious plugin result."));
-        console.log(warning("Possible malicious plugin attempt received!"));
-        return;
-    }
 
     if(!args.token) {
         let cookie = await getCookie();
