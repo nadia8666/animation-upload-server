@@ -84,9 +84,9 @@ async function upload(req, res, args) {
         let isGroupUpload = animationBuffer.readUintLE(byteOffset, 1);
         byteOffset++;
 
-        if(isGroupUpload == 1) {
-            let groupId = animationBuffer.readBigUint64LE(byteOffset);
-            byteOffset += 8;
+        if(isGroupUpload != 0) {
+            let groupId = BigInt(animationBuffer.toString("utf8", byteOffset, byteOffset + isGroupUpload)); // idk if this will work. i dont know any js im just guessing. hoping even, that big int exists since it used
+            byteOffset += isGroupUpload;
 
             uploadParameters.groupId = groupId;
         }
